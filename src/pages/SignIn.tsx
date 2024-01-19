@@ -12,6 +12,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 function Copyright(props: any) {
   return (
@@ -26,13 +28,29 @@ function Copyright(props: any) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignIn() {
+  const [correo, setCorreo] = React.useState('')
+  const [contrasenia, setContrasenia] = React.useState('')
+  const [error, setError] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState('')
+  const navigate = useNavigate()
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    console.log({
+      email: correo,
+      password: contrasenia,
+    });
+    // const existe = false
+    // if (existe === false){
+    //   setError(true)
+    //   setErrorMessage('El usuario o la contraseña son invalidos')
+    // } else {
+    //   navigate('/init-info')
+    // }
+    navigate('/init-info')
   };
 
   return (
@@ -53,26 +71,28 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
-              margin="normal"
               required
               fullWidth
+              autoFocus
               id="correo"
               label="Correo"
               name="correo"
+              margin="normal"
               autoComplete="correo"
-              autoFocus
+              onChange={e=>setCorreo(e.target.value)}
             />
             <TextField
-              margin="normal"
               required
               fullWidth
-              name="contrasenia"
-              label="Contraseña"
-              type="password"
               id="contrasenia"
-              autoComplete="current-password"
+              label="Contraseña"
+              name="contrasenia"
+              type="password"
+              margin="normal"
+              autoComplete="contrasenia"
+              onChange={e=>setContrasenia(e.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -86,6 +106,14 @@ export default function SignIn() {
             >
               Sign In
             </Button>
+            {error === true && 
+                <Alert 
+                  variant="filled" 
+                  severity="warning"
+                  sx={{ mb: 2 }}>
+                  {errorMessage}
+                </Alert>
+              }
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">
@@ -93,7 +121,7 @@ export default function SignIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link component={RouterLink} to="/sign-up" variant="body2">
                   {"¿No tienes una cuenta? Registrate"}
                 </Link>
               </Grid>

@@ -6,6 +6,7 @@ import SignInSide from './pages/SignInSide'
 import SignIn from './pages/SignIn'
 import InitInfo from './pages/InitInfo'
 import SignUp from './pages/SignUp';
+import SignUpMessage from './pages/SignUpMessage'
 
 function App() {
   const routes = useRoutes([
@@ -18,12 +19,16 @@ function App() {
       element: <SignUp/>
     },
     {
-      path: '/sign-in',
+      path: '/sign-in/:frs/:snd',
       element: <SignIn/>
     },
     {
       path: '/init-info',
       element: <InitInfo/>
+    },
+    {
+      path: '/sign-up-messg',
+      element: <SignUpMessage/>
     },
   ])
 

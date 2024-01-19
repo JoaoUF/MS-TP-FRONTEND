@@ -18,8 +18,10 @@ import InputLabel from '@mui/material/InputLabel';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import Alert from '@mui/material/Alert';
 import {
   Link as RouterLink,
+  useNavigate,
 } from 'react-router-dom';
 
 function Copyright(props: any) {
@@ -41,12 +43,15 @@ export default function SignUp() {
   const [nombre, setNombre] = React.useState('')
   const [apellido, setApelllido] = React.useState('')
   const [correo, setCorreo] = React.useState('')
-  const [fecha, setFecha] = React.useState('')
+  const [fecha, setFecha] = React.useState<null | Date>(null)
   const [genero, setGenero] = React.useState('')
   const [universidad, setUniversidad] = React.useState('')
   const [carrera, setCarrera] = React.useState('')
   const [contrasenia, setContrasenia] = React.useState('')
   const [confirmarContrasenia, setConfirmarContrasenia] = React.useState('')
+  const [error, setError] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,7 +59,7 @@ export default function SignUp() {
       nombre: nombre,
       apellido: apellido,
       correo: correo,
-      fecha: fecha,
+      fecha: dayjs(fecha).format('YYYY-MM-DD 00:00'),
       genero: genero,
       universidad: universidad,
       carrera: carrera,
@@ -62,7 +67,17 @@ export default function SignUp() {
       confirmarContrasenia: confirmarContrasenia,
     });
 
+    if (contrasenia !== confirmarContrasenia){
+      setError(true)
+      setErrorMessage('Las contraseñas ingresadas no coinciden')
+    }
+    
+    if (fecha === null){
+      setError(true)
+      setErrorMessage('Tienes que selecionar una fecha')
+    }
 
+    navigate('/sign-up-messg')
   };
 
   return (
@@ -83,7 +98,7 @@ export default function SignUp() {
           <Typography component="h1" variant="h5">
             Registro
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -94,7 +109,8 @@ export default function SignUp() {
                   name="nombre"
                   label="Nombre"
                   autoComplete="nombre"
-                  onChange={e=>setNombre(e.target.value)}
+                  value={nombre}
+                  onChange={e=>setNombre(e.target.value.replace(/[^a-z]/gi, ''))}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -105,7 +121,8 @@ export default function SignUp() {
                   label="Apellido"
                   name="apellido"
                   autoComplete="family-name"
-                  onChange={e=>setApelllido(e.target.value)}
+                  value={apellido}
+                  onChange={e=>setApelllido(e.target.value.replace(/[^a-z]/gi, ''))}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -122,7 +139,12 @@ export default function SignUp() {
               <Grid item xs={12}>
                 <LocalizationProvider 
                   dateAdapter={AdapterDayjs}>
-                  <DatePicker sx={{ width: "100% " }} value={fecha} onChange={e=>setFecha(dayjs(e).format('YYYY-MM-DD 00:00'))} />
+                  <DatePicker 
+                    disableFuture
+                    label='Fecha de nacimiento' 
+                    sx={{ width: "100%" }} 
+                    value={fecha} 
+                    onChange={e=>setFecha(e)} />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12}>
@@ -207,6 +229,14 @@ export default function SignUp() {
             >
               Registrarse
             </Button>
+            {error === true && 
+                <Alert 
+                  variant="filled" 
+                  severity="warning"
+                  sx={{ mb: 2 }}>
+                  {errorMessage}
+                </Alert>
+              }
             <Grid container justifyContent="flex-end">
               <Grid item>
                 {/* <Link component={RouterLink} to="/" variant="body2"> */}
