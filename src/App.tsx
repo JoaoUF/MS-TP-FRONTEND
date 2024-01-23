@@ -7,6 +7,7 @@ import SignIn from './pages/SignIn'
 import InitInfo from './pages/InitInfo'
 import SignUp from './pages/SignUp';
 import SignUpMessage from './pages/SignUpMessage'
+import './styles/Map.css'
 
 function App() {
   const routes = useRoutes([

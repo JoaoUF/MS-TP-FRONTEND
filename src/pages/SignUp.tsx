@@ -19,10 +19,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Alert from '@mui/material/Alert';
-import {
-  Link as RouterLink,
-  useNavigate,
-} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {Universidad} from '../models/universidad/Universidad.interface'
+import {UniversidadService} from '../models/universidad/Universidad.service'
+import {Carrera} from '../models/carrera/Carrera.interface'
+import {CarreraService} from '../models/carrera/Carrera.service'
+import { UsuarioService } from '../models/usuario/Usuario.service';
+import { useEffect } from 'react';
 
 function Copyright(props: any) {
   return (
@@ -44,41 +47,80 @@ export default function SignUp() {
   const [apellido, setApelllido] = React.useState('')
   const [correo, setCorreo] = React.useState('')
   const [fecha, setFecha] = React.useState<null | Date>(null)
-  const [genero, setGenero] = React.useState('')
+  const [genero, setGenero] = React.useState<boolean>()
   const [universidad, setUniversidad] = React.useState('')
-  const [carrera, setCarrera] = React.useState('')
+  const [carrera, setCarrera] = React.useState<number>()
   const [contrasenia, setContrasenia] = React.useState('')
   const [confirmarContrasenia, setConfirmarContrasenia] = React.useState('')
   const [error, setError] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
+  const [universidadLista, setUniversidadLista] = React.useState<Universidad[]>()
+  const [carreraLista, setCarreraLista] = React.useState<Carrera[]>()
   const navigate = useNavigate()
+
+  const getListaUniversidad = async () => {
+    try {
+      const universidadService = new UniversidadService()
+      const output = await universidadService.listarUniversidad()
+      setUniversidadLista(output)
+    } catch (error) {
+      setError(true)
+      setErrorMessage(`Error: ${error}`)
+    }
+  }
+
+  const getListaCarrera = async (pk:number) => {
+    try {
+      const carreraService = new CarreraService()
+      const output = await carreraService.buscarCarreraSegunUniversidad(pk)
+      setCarreraLista(output)
+    } catch (error) {
+      setError(true)
+      setErrorMessage(`Error: ${error}`)
+    }
+  }
+
+  const postUsuario = async () => {
+    try {
+      const data= {
+        nombre: nombre,
+        apellido: apellido,
+        genero: genero,
+        fechaNacimiento: dayjs(fecha).format('YYYY-MM-DD 00:00'),
+        correo: correo,
+        carrera: carrera,
+        tipoUsuario: 1,
+        usuario: correo,
+      }
+      const usuarioService = new UsuarioService()
+      const output = await usuarioService.crearUsuario(data)
+      const emailOutput = await usuarioService.sendEmail(output.idUsuario)      
+      if (emailOutput === 200) navigate('/sign-up-messg')
+    } catch (error) {
+      setError(true)
+      setErrorMessage(`Error: ${error}`)
+    }
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({
-      nombre: nombre,
-      apellido: apellido,
-      correo: correo,
-      fecha: dayjs(fecha).format('YYYY-MM-DD 00:00'),
-      genero: genero,
-      universidad: universidad,
-      carrera: carrera,
-      contrasenia: contrasenia,
-      confirmarContrasenia: confirmarContrasenia,
-    });
 
     if (contrasenia !== confirmarContrasenia){
       setError(true)
       setErrorMessage('Las contraseñas ingresadas no coinciden')
     }
-    
-    if (fecha === null){
+    else if (fecha === null){
       setError(true)
       setErrorMessage('Tienes que selecionar una fecha')
     }
-
-    navigate('/sign-up-messg')
+    else {
+      postUsuario()
+    }
   };
+
+  useEffect(() => {
+    getListaUniversidad()
+  }, [])
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -157,7 +199,7 @@ export default function SignUp() {
                     id="gender"
                     value={genero}
                     label="Genero"
-                    onChange={e=>setGenero(e.target.value as string)}
+                    onChange={e=>setGenero(e.target.value === '1')}
                   >
                     <MenuItem value={1}>Masculino</MenuItem>
                     <MenuItem value={2}>Femenino</MenuItem>
@@ -174,9 +216,19 @@ export default function SignUp() {
                     id="university"
                     value={universidad}
                     label="Universidad"
-                    onChange={e=>setUniversidad(e.target.value as string)}
-                  >
-                    <MenuItem value={1}>Universidad Peruana de Ciencias Aplicadas</MenuItem>
+                    onChange={(e)=>{
+                        setUniversidad(e.target.value as string)
+                      }}
+                    >
+                    {
+                      universidadLista?.map((uni) => (
+                        <MenuItem 
+                          key={uni.idUniversidad} 
+                          value={uni.idUniversidad}>
+                            {uni.nombre}
+                        </MenuItem>
+                      ))
+                    }
                   </Select>
                 </FormControl>
               </Grid>
@@ -190,9 +242,13 @@ export default function SignUp() {
                     id="career"
                     value={carrera}
                     label="Carrera"
-                    onChange={e=>setCarrera(e.target.value as string)}
+                    onChange={e=>setCarrera(e.target.value as number)}
                   >
-                    <MenuItem value={1}>Ingenieria de Sistemas de información</MenuItem>
+                    {
+                      carreraLista?.map((carr) => (
+                        <MenuItem value={carr.idCarrera}>{carr.nombre}</MenuItem>
+                      ))
+                    }
                   </Select>
                 </FormControl>
               </Grid>
@@ -239,7 +295,6 @@ export default function SignUp() {
               }
             <Grid container justifyContent="flex-end">
               <Grid item>
-                {/* <Link component={RouterLink} to="/" variant="body2"> */}
                 <Link variant="body2">
                     ¿Ya tienes una cuenta?  Inicia sesión
                 </Link>

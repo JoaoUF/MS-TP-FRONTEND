@@ -1,6 +1,6 @@
 import React from 'react'
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/joy/Avatar';
+import Avatar from '@mui/material/Avatar';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 
@@ -18,11 +18,7 @@ const BasicInfo = () => {
         justifyContent="space-evenly"
         sx={{ width: 1, minHeight:'450px' }}>
         <Grid item xs={12} sx={{mb:3, mt:3}}>
-          <Avatar
-            size="lg"
-            variant="solid"
-            sx={{"--Avatar-size": "130px", bgcolor: '#e0e0e0'}}
-          />
+          <Avatar src="/broken-image.jpg" />
         </Grid>
         <Grid item xs={12} sx={{width: 1}}>
           <TextField
