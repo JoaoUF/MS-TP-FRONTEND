@@ -2,11 +2,12 @@ import * as React from 'react';
 import dayjs from 'dayjs';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
+import SaveIcon from '@mui/icons-material/Save';
 import Box from '@mui/material/Box';
+import LoadingButton from '@mui/lab/LoadingButton';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -47,15 +48,17 @@ export default function SignUp() {
   const [apellido, setApelllido] = React.useState('')
   const [correo, setCorreo] = React.useState('')
   const [fecha, setFecha] = React.useState<null | Date>(null)
-  const [genero, setGenero] = React.useState<boolean>()
+  const [genero, setGenero] = React.useState('')
   const [universidad, setUniversidad] = React.useState('')
-  const [carrera, setCarrera] = React.useState<number>()
+  const [carrera, setCarrera] = React.useState('')
+  const [idCarrera, setIdCarrera] = React.useState<number>()
   const [contrasenia, setContrasenia] = React.useState('')
   const [confirmarContrasenia, setConfirmarContrasenia] = React.useState('')
   const [error, setError] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
   const [universidadLista, setUniversidadLista] = React.useState<Universidad[]>()
   const [carreraLista, setCarreraLista] = React.useState<Carrera[]>()
+  const [cargandoRegistro, setCargandoRegistro] = React.useState(false)
   const navigate = useNavigate()
 
   const getListaUniversidad = async () => {
@@ -85,12 +88,13 @@ export default function SignUp() {
       const data= {
         nombre: nombre,
         apellido: apellido,
-        genero: genero,
+        genero: genero === '1',
         fechaNacimiento: dayjs(fecha).format('YYYY-MM-DD 00:00'),
         correo: correo,
-        carrera: carrera,
+        carrera: idCarrera,
         tipoUsuario: 1,
         usuario: correo,
+        contrasenia: contrasenia,
       }
       const usuarioService = new UsuarioService()
       const output = await usuarioService.crearUsuario(data)
@@ -99,19 +103,23 @@ export default function SignUp() {
     } catch (error) {
       setError(true)
       setErrorMessage(`Error: ${error}`)
+      setCargandoRegistro(false)
     }
   }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setCargandoRegistro(true)
+    
     if (contrasenia !== confirmarContrasenia){
       setError(true)
       setErrorMessage('Las contraseñas ingresadas no coinciden')
+      setCargandoRegistro(false)
     }
     else if (fecha === null){
       setError(true)
       setErrorMessage('Tienes que selecionar una fecha')
+      setCargandoRegistro(false)
     }
     else {
       postUsuario()
@@ -125,7 +133,6 @@ export default function SignUp() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
-        <CssBaseline />
         <Box
           sx={{
             marginTop: 8,
@@ -190,16 +197,16 @@ export default function SignUp() {
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-gender">Genero</InputLabel>
+                <FormControl fullWidth id='gender-form' >
+                  <InputLabel id="demo-simple-select-gender" >Genero</InputLabel>
                   <Select
                     required
                     fullWidth
                     labelId="demo-simple-select-gender"
                     id="gender"
-                    value={genero}
                     label="Genero"
-                    onChange={e=>setGenero(e.target.value === '1')}
+                    value={genero}
+                    onChange={e=>setGenero(e.target.value as string)}
                   >
                     <MenuItem value={1}>Masculino</MenuItem>
                     <MenuItem value={2}>Femenino</MenuItem>
@@ -218,6 +225,7 @@ export default function SignUp() {
                     label="Universidad"
                     onChange={(e)=>{
                         setUniversidad(e.target.value as string)
+                        getListaCarrera(Number(e.target.value))
                       }}
                     >
                     {
@@ -242,11 +250,17 @@ export default function SignUp() {
                     id="career"
                     value={carrera}
                     label="Carrera"
-                    onChange={e=>setCarrera(e.target.value as number)}
+                    onChange={e=>{
+                      setCarrera(e.target.value as string)
+                      setIdCarrera(Number(e.target.value))
+                    }}
                   >
                     {
                       carreraLista?.map((carr) => (
-                        <MenuItem value={carr.idCarrera}>{carr.nombre}</MenuItem>
+                        <MenuItem 
+                          key={carr.idCarrera} 
+                          value={carr.idCarrera}>{carr.nombre}
+                        </MenuItem>
                       ))
                     }
                   </Select>
@@ -277,14 +291,30 @@ export default function SignUp() {
                 />
               </Grid>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Registrarse
-            </Button>
+            {
+              cargandoRegistro === false ?
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              > Registrarse
+              </Button>
+              :
+              <LoadingButton
+                disabled
+                loading 
+                fullWidth
+                color="secondary"
+                loadingPosition="start"
+                startIcon={<SaveIcon />}
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                <span>Registrandose</span>
+              </LoadingButton>
+            }
+              
             {error === true && 
                 <Alert 
                   variant="filled" 

@@ -20,7 +20,7 @@ function App() {
       element: <SignUp/>
     },
     {
-      path: '/sign-in/:frs/:snd',
+      path: '/sign-in/:frs/:snd/',
       element: <SignIn/>
     },
     {
