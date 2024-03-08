@@ -21,10 +21,10 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Alert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
-import {Universidad} from '../models/universidad/Universidad.interface'
-import {UniversidadService} from '../models/universidad/Universidad.service'
-import {Carrera} from '../models/carrera/Carrera.interface'
-import {CarreraService} from '../models/carrera/Carrera.service'
+import { Universidad } from '../models/universidad/Universidad.interface'
+import { UniversidadService } from '../models/universidad/Universidad.service'
+import { Carrera } from '../models/carrera/Carrera.interface'
+import { CarreraService } from '../models/carrera/Carrera.service'
 import { UsuarioService } from '../models/usuario/Usuario.service';
 import { useEffect } from 'react';
 
@@ -72,7 +72,7 @@ export default function SignUp() {
     }
   }
 
-  const getListaCarrera = async (pk:number) => {
+  const getListaCarrera = async (pk: number) => {
     try {
       const carreraService = new CarreraService()
       const output = await carreraService.buscarCarreraSegunUniversidad(pk)
@@ -85,7 +85,7 @@ export default function SignUp() {
 
   const postUsuario = async () => {
     try {
-      const data= {
+      const data = {
         nombre: nombre,
         apellido: apellido,
         genero: genero === '1',
@@ -98,9 +98,10 @@ export default function SignUp() {
       }
       const usuarioService = new UsuarioService()
       const output = await usuarioService.crearUsuario(data)
-      const emailOutput = await usuarioService.sendEmail(output.idUsuario)      
-      if (emailOutput === 200) navigate('/sign-up-messg')
+      const emailOutput = await usuarioService.sendEmail(output.idUsuario)
+      navigate('/sign-up-messg')
     } catch (error) {
+      console.log(error)
       setError(true)
       setErrorMessage(`Error: ${error}`)
       setCargandoRegistro(false)
@@ -110,13 +111,13 @@ export default function SignUp() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCargandoRegistro(true)
-    
-    if (contrasenia !== confirmarContrasenia){
+
+    if (contrasenia !== confirmarContrasenia) {
       setError(true)
       setErrorMessage('Las contraseñas ingresadas no coinciden')
       setCargandoRegistro(false)
     }
-    else if (fecha === null){
+    else if (fecha === null) {
       setError(true)
       setErrorMessage('Tienes que selecionar una fecha')
       setCargandoRegistro(false)
@@ -159,7 +160,7 @@ export default function SignUp() {
                   label="Nombre"
                   autoComplete="nombre"
                   value={nombre}
-                  onChange={e=>setNombre(e.target.value.replace(/[^a-z]/gi, ''))}
+                  onChange={e => setNombre(e.target.value.replace(/[^a-z]/gi, ''))}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -171,7 +172,7 @@ export default function SignUp() {
                   name="apellido"
                   autoComplete="family-name"
                   value={apellido}
-                  onChange={e=>setApelllido(e.target.value.replace(/[^a-z]/gi, ''))}
+                  onChange={e => setApelllido(e.target.value.replace(/[^a-z]/gi, ''))}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -182,18 +183,18 @@ export default function SignUp() {
                   label="Correo"
                   name="correo"
                   autoComplete="email"
-                  onChange={e=>setCorreo(e.target.value)}
+                  onChange={e => setCorreo(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
-                <LocalizationProvider 
+                <LocalizationProvider
                   dateAdapter={AdapterDayjs}>
-                  <DatePicker 
+                  <DatePicker
                     disableFuture
-                    label='Fecha de nacimiento' 
-                    sx={{ width: "100%" }} 
-                    value={fecha} 
-                    onChange={e=>setFecha(e)} />
+                    label='Fecha de nacimiento'
+                    sx={{ width: "100%" }}
+                    value={fecha}
+                    onChange={e => setFecha(e)} />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12}>
@@ -206,7 +207,7 @@ export default function SignUp() {
                     id="gender"
                     label="Genero"
                     value={genero}
-                    onChange={e=>setGenero(e.target.value as string)}
+                    onChange={e => setGenero(e.target.value as string)}
                   >
                     <MenuItem value={1}>Masculino</MenuItem>
                     <MenuItem value={2}>Femenino</MenuItem>
@@ -223,17 +224,17 @@ export default function SignUp() {
                     id="university"
                     value={universidad}
                     label="Universidad"
-                    onChange={(e)=>{
-                        setUniversidad(e.target.value as string)
-                        getListaCarrera(Number(e.target.value))
-                      }}
-                    >
+                    onChange={(e) => {
+                      setUniversidad(e.target.value as string)
+                      getListaCarrera(Number(e.target.value))
+                    }}
+                  >
                     {
                       universidadLista?.map((uni) => (
-                        <MenuItem 
-                          key={uni.idUniversidad} 
+                        <MenuItem
+                          key={uni.idUniversidad}
                           value={uni.idUniversidad}>
-                            {uni.nombre}
+                          {uni.nombre}
                         </MenuItem>
                       ))
                     }
@@ -250,15 +251,15 @@ export default function SignUp() {
                     id="career"
                     value={carrera}
                     label="Carrera"
-                    onChange={e=>{
+                    onChange={e => {
                       setCarrera(e.target.value as string)
                       setIdCarrera(Number(e.target.value))
                     }}
                   >
                     {
                       carreraLista?.map((carr) => (
-                        <MenuItem 
-                          key={carr.idCarrera} 
+                        <MenuItem
+                          key={carr.idCarrera}
                           value={carr.idCarrera}>{carr.nombre}
                         </MenuItem>
                       ))
@@ -275,7 +276,7 @@ export default function SignUp() {
                   type="password"
                   id="contrasenia"
                   autoComplete="contrasenia"
-                  onChange={e=>setContrasenia(e.target.value)}
+                  onChange={e => setContrasenia(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -287,46 +288,46 @@ export default function SignUp() {
                   type="password"
                   id="confirmarContrasenia"
                   autoComplete="confirmarContrasenia"
-                  onChange={e=>setConfirmarContrasenia(e.target.value)}
+                  onChange={e => setConfirmarContrasenia(e.target.value)}
                 />
               </Grid>
             </Grid>
             {
               cargandoRegistro === false ?
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              > Registrarse
-              </Button>
-              :
-              <LoadingButton
-                disabled
-                loading 
-                fullWidth
-                color="secondary"
-                loadingPosition="start"
-                startIcon={<SaveIcon />}
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                <span>Registrandose</span>
-              </LoadingButton>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                > Registrarse
+                </Button>
+                :
+                <LoadingButton
+                  disabled
+                  loading
+                  fullWidth
+                  color="secondary"
+                  loadingPosition="start"
+                  startIcon={<SaveIcon />}
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  <span>Registrandose</span>
+                </LoadingButton>
             }
-              
-            {error === true && 
-                <Alert 
-                  variant="filled" 
-                  severity="warning"
-                  sx={{ mb: 2 }}>
-                  {errorMessage}
-                </Alert>
-              }
+
+            {error === true &&
+              <Alert
+                variant="filled"
+                severity="warning"
+                sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            }
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link variant="body2">
-                    ¿Ya tienes una cuenta?  Inicia sesión
+                  ¿Ya tienes una cuenta?  Inicia sesión
                 </Link>
               </Grid>
             </Grid>

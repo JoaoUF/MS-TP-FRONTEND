@@ -1,19 +1,23 @@
-import * as React from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Toolbar from '@mui/material/Toolbar';
-import Paper from '@mui/material/Paper';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import CssBaseline from '@mui/material/CssBaseline'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import Toolbar from '@mui/material/Toolbar'
+import Paper from '@mui/material/Paper'
+import Stepper from '@mui/material/Stepper'
+import Step from '@mui/material/Step'
+import StepLabel from '@mui/material/StepLabel'
+import Button from '@mui/material/Button'
+import Link from '@mui/material/Link'
+import Typography from '@mui/material/Typography'
 import BasicInfo from '../components/BasicInfo'
 import HabitInfo from '../components/HabitInfo'
 import HomeInfo from '../components/HomeInfo'
+import { EightMpTwoTone } from '@mui/icons-material'
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { UsuarioService } from '../models/usuario/Usuario.service'
+import { ViviendaService } from '../models/vivienda/Vivienda.service'
 
 function Copyright() {
   return (
@@ -30,29 +34,107 @@ function Copyright() {
 
 const steps = ['Analisis personalidad', 'Analisis habitos', 'Detalles hogar'];
 
-function getStepContent(step: number) {
+function getStepContent
+  (
+    step: number, change: any, image: any, setImage: any, text: any, setText: any,
+    firstQuestion: any, setFirstQuestion: any, secondQuestion: any, setSecondQuestion: any, thirdQuestion: any, setThirdQuestion: any, fourthQuestion: any, setFourthQuestion: any,
+    fifthQuestion: any, setFifthQuestion: any, sixthQuestion: any, setSixthQuestion: any, seventhQuestion: any, setSeventhQuestion: any, eighthQuestion: any, setEighthQuestion: any,
+    ninthQuestion: any, setNinthQuestion: any, tenthQuestion: any, setTenthQuestion: any, location: any, setLocation: any, radio: any, setRadio: any,
+  ) {
   switch (step) {
     case 0:
-      return <BasicInfo />;
+      return <BasicInfo change={change} image={image} setImage={setImage} text={text} setText={setText} />
     case 1:
-      return <HabitInfo />;
+      return <HabitInfo change={change} firstQuestion={firstQuestion} setFirstQuestion={setFirstQuestion} secondQuestion={secondQuestion} setSecondQuestion={setSecondQuestion}
+        thirdQuestion={thirdQuestion} setThirdQuestion={setThirdQuestion} fourthQuestion={fourthQuestion} setFourthQuestion={setFourthQuestion} fifthQuestion={fifthQuestion} setFifthQuestion={setFifthQuestion}
+        sixthQuestion={sixthQuestion} setSixthQuestion={setSixthQuestion} seventhQuestion={seventhQuestion} setSeventhQuestion={setSeventhQuestion} eighthQuestion={eighthQuestion}
+        setEighthQuestion={setEighthQuestion} ninthQuestion={ninthQuestion} setNinthQuestion={setNinthQuestion} tenthQuestion={tenthQuestion} setTenthQuestion={setTenthQuestion} />
     case 2:
-      return <HomeInfo />;
+      return <HomeInfo change={change} radio={radio} setRadio={setRadio} location={location} setLocation={setLocation} />
     default:
       throw new Error('Unknown step');
   }
 }
 
+type LatLogLiteral = google.maps.LatLngLiteral
+
 export default function InitInfo() {
-  const [activeStep, setActiveStep] = React.useState(0);
+  // steper variables
+  const [activeStep, setActiveStep] = useState(0);
+  const [completeInfo, setCompleteInfo] = useState(false)
+  const [formularioEnviado, setFormularioEnviado] = useState(false)
+  const navigate = useNavigate()
+  const { state } = useLocation()
+
+  // basic-info variables
+  const [image, setImage] = useState(null)
+  const [text, setText] = useState('')
+
+  // habit-info variables
+  const [firstQuestion, setFirstQuestion] = useState<string | null>(null)
+  const [secondQuestion, setSecondQuestion] = useState<string | null>(null)
+  const [thirdQuestion, setThirdQuestion] = useState<string | null>(null)
+  const [fourthQuestion, setFourthQuestion] = useState<string | null>(null)
+  const [fifthQuestion, setFifthQuestion] = useState<string | null>(null)
+  const [sixthQuestion, setSixthQuestion] = useState<string | null>(null)
+  const [seventhQuestion, setSeventhQuestion] = useState<string | null>(null)
+  const [eighthQuestion, setEighthQuestion] = useState<string | null>(null)
+  const [ninthQuestion, setNinthQuestion] = useState<string | null>(null)
+  const [tenthQuestion, setTenthQuestion] = useState<string | null>(null)
+
+  // home-info variables
+  const [location, setLocation] = useState<LatLogLiteral>()
+  const [radio, setRadio] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (activeStep === steps.length && formularioEnviado) {
+      handleSubmit()
+    }
+  }, [activeStep, formularioEnviado])
+
+  const changeCompleteInfo = (input: boolean) => {
+    setCompleteInfo(input)
+  }
 
   const handleNext = () => {
-    setActiveStep(activeStep + 1);
-  };
+    setActiveStep(activeStep + 1)
+    if (activeStep === steps.length - 1) {
+      setFormularioEnviado(true)
+    }
+  }
 
   const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
+    setActiveStep(activeStep - 1)
+  }
+
+  const handleSubmit = async () => {
+    try {
+      const dataHogar = {
+        latitud: location?.lat,
+        longitud: location?.lng,
+        radio: radio,
+        usuario: state.correo
+      }
+      const viviendaService = new ViviendaService()
+      const viviendaOutput = await viviendaService.crearVivienda(dataHogar)
+      // const formData = new FormData()
+      const dataUsuario = {
+        imagenPerfil: image,
+        descripcion: text,
+        puntajeHabito: 'A',
+        vivienda: viviendaOutput.idVivienda,
+        usuario: state.correo,
+        primerIngreso: true
+      }
+      console.log(dataUsuario)
+      const usuarioService = new UsuarioService()
+      const usuarioOutput = await usuarioService.actulizarUsuario(state.idUsuario, dataUsuario)
+      setFormularioEnviado(false)
+      navigate('/dashboard/emparejamiento', { state: usuarioOutput })
+    } catch {
+
+    }
+  }
 
   return (
     <React.Fragment>
@@ -87,28 +169,47 @@ export default function InitInfo() {
           {activeStep === steps.length ? (
             <React.Fragment>
               <Typography variant="h5" gutterBottom>
-                Analisis de personalidad
+                Cargando información
               </Typography>
               <Typography variant="subtitle1">
-              La información previamente solicitada será empleada exclusivamente con el propósito de elevar la calidad de los prospectos que le proporcionamos. Existe la posibilidad de que sea necesario llevar a cabo nuevas encuestas. Nos comprometemos a mantener una comunicación constante al respecto.
+                Estamos procesando la información, espere un momento.
               </Typography>
             </React.Fragment>
           ) : (
             <React.Fragment>
-              {getStepContent(activeStep)}
+              {getStepContent
+                (
+                  activeStep, changeCompleteInfo, image, setImage, text, setText,
+                  firstQuestion, setFirstQuestion, secondQuestion, setSecondQuestion, thirdQuestion, setThirdQuestion, fourthQuestion, setFourthQuestion, fifthQuestion, setFifthQuestion,
+                  sixthQuestion, setSixthQuestion, seventhQuestion, setSeventhQuestion, eighthQuestion, setEighthQuestion, ninthQuestion, setNinthQuestion, tenthQuestion, setTenthQuestion,
+                  location, setLocation, radio, setRadio
+                )
+              }
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 {activeStep !== 0 && (
                   <Button onClick={handleBack} sx={{ mt: 3, ml: 1 }}>
                     Atrás
                   </Button>
                 )}
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  sx={{ mt: 3, ml: 1 }}
-                >
-                  {activeStep === steps.length - 1 ? 'Place order' : 'Siguiente'}
-                </Button>
+                {
+                  completeInfo ?
+                    (<Button
+                      variant="contained"
+                      onClick={handleNext}
+                      sx={{ mt: 3, ml: 1 }}
+                    >
+                      {activeStep === steps.length - 1 ? 'Terminar' : 'Siguiente'}
+                    </Button>)
+                    :
+                    (<Button
+                      variant="contained"
+                      onClick={handleNext}
+                      sx={{ mt: 3, ml: 1 }}
+                      disabled
+                    >
+                      {activeStep === steps.length - 1 ? 'Terminar' : 'Siguiente'}
+                    </Button>)
+                }
               </Box>
             </React.Fragment>
           )}

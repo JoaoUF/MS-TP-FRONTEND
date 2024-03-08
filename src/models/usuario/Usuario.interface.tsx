@@ -8,7 +8,7 @@ export interface Usuario {
   description: string
   puntajeHabito: string
   correo: string
-  contrasenia: string 
+  contrasenia: string
   activo: boolean
   primerIngreso: boolean
   carrera: number

@@ -10,12 +10,16 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
+import LoadingButton from '@mui/lab/LoadingButton';
+import SaveIcon from '@mui/icons-material/Save';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
+import { AuthService } from '../models/auth/Auth.service'
 import {
   Link as RouterLink,
   useNavigate,
 } from 'react-router-dom';
+import { cleanDigitSectionValue } from '@mui/x-date-pickers/internals/hooks/useField/useField.utils';
 
 function Copyright(props: any) {
   return (
@@ -37,20 +41,28 @@ export default function SignInSide() {
   const [contrasenia, setContrasenia] = React.useState('')
   const [error, setError] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
+  const [cargandoInicio, setCargandoInicio] = React.useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({
-      email: correo,
-      password: contrasenia,
-    });
-    const existe = false
-    if (existe === false){
+    setCargandoInicio(true)
+    try {
+      const data = {
+        usuario: correo,
+        contrasenia: contrasenia
+      }
+      const authService = new AuthService()
+      const usuarioOutput = await authService.loginAccont(data)
+      if (!usuarioOutput.primerIngreso) {
+        navigate('/init-info', { state: usuarioOutput })
+      } else {
+        navigate('/dashboard/inicio', { state: usuarioOutput })
+      }
+    } catch (error: any) {
       setError(true)
-      setErrorMessage('El usuario o la contraseña son invalidos')
-    } else {
-      navigate('/init-info')
+      setErrorMessage(`${error.response.data.message}`)
+      setCargandoInicio(false)
     }
   };
 
@@ -97,9 +109,9 @@ export default function SignInSide() {
                 name="correo"
                 type="email"
                 autoComplete="correo"
-                onChange={e=>setCorreo(e.target.value)}
+                onChange={e => setCorreo(e.target.value)}
                 autoFocus
-                />
+              />
               <TextField
                 margin="normal"
                 required
@@ -109,23 +121,39 @@ export default function SignInSide() {
                 name="contrasenia"
                 type="password"
                 autoComplete="contrasenia"
-                onChange={e=>setContrasenia(e.target.value)}
+                onChange={e => setContrasenia(e.target.value)}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Recordar"
               />
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                >
-                Sign In
-              </Button>
-              {error === true && 
-                <Alert 
-                  variant="filled" 
+              {
+                cargandoInicio === false ?
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                  >
+                    Sign In
+                  </Button>
+                  :
+                  <LoadingButton
+                    disabled
+                    loading
+                    fullWidth
+                    color="secondary"
+                    loadingPosition="start"
+                    startIcon={<SaveIcon />}
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                  >
+                    <span>Iniciando sesión</span>
+                  </LoadingButton>
+              }
+              {error === true &&
+                <Alert
+                  variant="filled"
                   severity="warning"
                   sx={{ mb: 2 }}>
                   {errorMessage}
