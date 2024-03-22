@@ -11,27 +11,25 @@ import MenuItem from '@mui/material/MenuItem'
 import {
   GoogleMap,
   Marker,
-  DirectionsRenderer,
   Circle,
-  MarkerClusterer,
   useLoadScript,
+  Libraries,
+  useJsApiLoader,
 } from "@react-google-maps/api"
 import Places from './Places'
 import { useNextMonthDisabled } from '@mui/x-date-pickers/internals'
 
 type LatLogLiteral = google.maps.LatLngLiteral
-type DirectionsResult = google.maps.DirectionsResult
 type MapOptions = google.maps.MapOptions
 
 const HomeInfo = ({ change, location, setLocation, radio, setRadio }: any) => {
-  // const [location, setLocation] = useState<LatLogLiteral>()
-  // const [radio, setRadio] = useState('3')
   const [newZoom, setNewZoom] = useState('13')
+  const libraries = useRef<Libraries>(['places']);
   const mapRef = useRef<GoogleMap>()
 
-  const { isLoaded } = useLoadScript({
+  const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
-    libraries: ['places'],
+    libraries: libraries.current
   });
 
   const center = useMemo<LatLogLiteral>(() => ({ lat: -12.103321431813999, lng: -76.96337168465614 }), [])
@@ -39,9 +37,8 @@ const HomeInfo = ({ change, location, setLocation, radio, setRadio }: any) => {
   const options = useMemo<MapOptions>(() => ({
     disableDefaultUI: true,
     clickableIcons: false,
-    // desabilita los siugientes para que el usuario se pueda mover
-    gestureHandling: 'none',
-    keyboardShortcuts: false,
+    // gestureHandling: 'none',
+    // keyboardShortcuts: false,
   }), [])
 
   const onLoad = useCallback((map: any) => (mapRef.current = map), [])
@@ -100,7 +97,7 @@ const HomeInfo = ({ change, location, setLocation, radio, setRadio }: any) => {
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={radio}
+                value={radio || ''}
                 label="Kilometros a la redonda"
                 onChange={handleChange}
               >

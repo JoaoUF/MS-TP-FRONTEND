@@ -6,14 +6,13 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Alert from '@mui/material/Alert'
+import Snackbar from '@mui/material/Snackbar'
 import FileUploadIcon from '@mui/icons-material/FileUpload'
 import TextField from '@mui/material/TextField'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UsuarioService } from '../../models/usuario/Usuario.service'
-import Snackbar from '@mui/material/Snackbar'
 
 export const Profile = () => {
-
   const navigate = useNavigate()
   const { state } = useLocation()
   const [image, setImage] = useState(null)
@@ -70,7 +69,7 @@ export const Profile = () => {
               display='flex'
               justifyContent="center"
               alignItems="center"
-              sx={{ backgroundColor: '#ffffff', width: '1', borderRadius: '5px', minHeight: '50%', p: '2rem', }}>
+              sx={{ backgroundColor: '#ffffff', width: '1', borderRadius: '4px', minHeight: '50%', p: '2rem', }}>
               <Stack
                 direction="column"
                 justifyContent="center"
@@ -124,7 +123,7 @@ export const Profile = () => {
               sx={{
                 backgroundColor: '#ffffff',
                 width: '1',
-                borderRadius: '5px',
+                borderRadius: '4px',
                 height: '100%',
                 p: '2rem',
                 display: 'flex',
@@ -143,7 +142,7 @@ export const Profile = () => {
                 id="standard-multiline-flexible"
                 multiline
                 rows={20}
-                maxRows={20}
+                // maxRows={20}
                 value={text}
                 onChange={e => setText(e.target.value)}
                 sx={{ width: '1', flexGrow: 1, mb: 1 }}

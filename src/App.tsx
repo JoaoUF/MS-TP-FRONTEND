@@ -77,7 +77,7 @@ function App() {
 
   return (
     routes
-  );
+  )
 }
 
 export default App;

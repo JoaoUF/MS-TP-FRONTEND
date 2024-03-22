@@ -23,7 +23,11 @@ export class ViviendaService {
   }
 
   actulizarVivienda(pk: number, data: any): Promise<Vivienda> {
-    return AxiosConfig.put(`vivienda/${pk}/`, data)
+    return AxiosConfig.put(`vivienda/${pk}/`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
       .then((response: AxiosResponse<Vivienda>) => response.data)
   }
 

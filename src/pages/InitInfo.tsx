@@ -15,7 +15,7 @@ import BasicInfo from '../components/BasicInfo'
 import HabitInfo from '../components/HabitInfo'
 import HomeInfo from '../components/HomeInfo'
 import { EightMpTwoTone } from '@mui/icons-material'
-import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import { UsuarioService } from '../models/usuario/Usuario.service'
 import { ViviendaService } from '../models/vivienda/Vivienda.service'
 

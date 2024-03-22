@@ -278,10 +278,8 @@ export default function Dashboard() {
           <Toolbar />
           <Container
             maxWidth="xl"
-            // sx={{ mt: 4, mb: 4, height: 'calc(100% - 128px)', }}
             sx={{ mt: 4, mb: 4, flexGrow: 1, }}
           >
-            {/* {height} */}
             <Outlet />
           </Container>
         </Box>

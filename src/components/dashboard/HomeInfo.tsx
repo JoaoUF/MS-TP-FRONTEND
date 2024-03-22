@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import CircularProgress from '@mui/material/CircularProgress'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
+import CircularProgress from '@mui/material/CircularProgress'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
+import Alert from '@mui/material/Alert'
+import Snackbar from '@mui/material/Snackbar'
 import Places from '../Places'
 import {
   GoogleMap,
@@ -21,7 +23,6 @@ import { ViviendaService } from '../../models/vivienda/Vivienda.service'
 import { Vivienda } from '../../models/vivienda/Vivienda.interface'
 
 type LatLogLiteral = google.maps.LatLngLiteral
-type DirectionsResult = google.maps.DirectionsResult
 type MapOptions = google.maps.MapOptions
 
 export const HomeInfo = () => {
@@ -39,10 +40,48 @@ export const HomeInfo = () => {
     // keyboardShortcuts: false,
   }), [])
   const onLoad = useCallback((map: any) => (mapRef.current = map), [])
-  const { isLoaded } = useLoadScript({
+  const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
     libraries: libraries.current
   })
+  const [snack, setSnack] = useState({
+    open: false,
+    severity: '',
+    text: ''
+  })
+
+  const handleClick = (textValue: string, severityValue: string) => {
+    setSnack({
+      open: true,
+      severity: severityValue,
+      text: textValue
+    })
+  }
+
+  const handleClose = () => {
+    setSnack({
+      open: false,
+      severity: '',
+      text: ''
+    })
+  }
+
+  const updateVivienda = async () => {
+    try {
+      const dataVivienda = {
+        latitud: location?.lat,
+        longitud: location?.lng,
+        radio: radio,
+        usuario: state.correo
+      }
+      console.log(dataVivienda)
+      const viviendaService = new ViviendaService()
+      const viviendaOutput = await viviendaService.actulizarVivienda(state.vivienda, dataVivienda)
+      handleClick('Actualización exitosa.', 'success')
+    } catch (error) {
+      handleClick('Error al actualizar la información.', 'error')
+    }
+  }
 
   const handleChange = (event: SelectChangeEvent) => {
     const newValue = event.target.value as string
@@ -68,7 +107,7 @@ export const HomeInfo = () => {
       mapRef.current?.panTo({ lat: viviendaOutput.latitud, lng: viviendaOutput.longitud })
       setRadio(String(viviendaOutput.radio))
     } catch {
-
+      handleClick('Error al cargar información, vuelve a cargar la página.', 'error')
     }
   }
 
@@ -106,7 +145,7 @@ export const HomeInfo = () => {
               width='100%'
               height='100%'
               flexDirection='column'
-              sx={{ backgroundColor: '#ffffff', borderRadius: '5px', p: '2rem', }}
+              sx={{ backgroundColor: '#ffffff', borderRadius: '4px', p: '2rem', }}
             >
               <Places setLocation={(position: any) => {
                 setLocation(position)
@@ -136,7 +175,7 @@ export const HomeInfo = () => {
                 height='100%'
                 sx={{ flexGrow: 1 }}
               >
-                <Button variant="contained" sx={{ width: '100%' }}>
+                <Button onClick={updateVivienda} variant="contained" sx={{ width: '100%' }}>
                   Guardar
                 </Button>
               </Box>
@@ -149,7 +188,7 @@ export const HomeInfo = () => {
               alignItems="center"
               width='100%'
               height='100%'
-              sx={{ backgroundColor: '#ffffff', borderRadius: '5px', }}
+              sx={{ backgroundColor: '#ffffff', borderRadius: '4px', }}
             >
               <GoogleMap
                 zoom={Number(newZoom)}
@@ -169,6 +208,19 @@ export const HomeInfo = () => {
           </Grid>
         </Grid>
       </Box>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={snack.open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        {(() => {
+          switch (snack.severity) {
+            case 'success': return <Alert onClose={handleClose} severity='success' variant="filled" sx={{ width: '100%' }} >{snack.text}</Alert>;
+            case 'error': return <Alert onClose={handleClose} severity='error' variant="filled" sx={{ width: '100%' }} >{snack.text}</Alert>;
+          }
+        })()}
+      </Snackbar>
     </React.Fragment >
   )
 }
